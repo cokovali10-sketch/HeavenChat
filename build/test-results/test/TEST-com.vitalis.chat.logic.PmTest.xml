@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.vitalis.chat.logic.PmTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-26T09:20:07.753Z" hostname="DESKTOP-VA18UL4" time="0.114">
+  <properties/>
+  <testcase name="parsesRealPlayersShape()" classname="com.vitalis.chat.logic.PmTest" time="0.073"/>
+  <testcase name="incomingRenders()" classname="com.vitalis.chat.logic.PmTest" time="0.031"/>
+  <testcase name="hoursText()" classname="com.vitalis.chat.logic.PmTest" time="0.004"/>
+  <testcase name="outgoingRenders()" classname="com.vitalis.chat.logic.PmTest" time="0.001"/>
+  <testcase name="hoverText()" classname="com.vitalis.chat.logic.PmTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
