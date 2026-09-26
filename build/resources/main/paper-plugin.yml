@@ -1,5 +1,5 @@
-name: HeavenChat
-version: 1.6.0
+name: HeavenPM
+version: 1.0.0
 main: com.vitalis.chat.HeavenChat
 api-version: "1.21"
 author: Vitalis

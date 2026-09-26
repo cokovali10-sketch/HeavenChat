@@ -1,4 +1,4 @@
-name: HeavenChat
+name: HeavenPM
 version: ${version}
 main: com.vitalis.chat.HeavenChat
 api-version: "1.21"
