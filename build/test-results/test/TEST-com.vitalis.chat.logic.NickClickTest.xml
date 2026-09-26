@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.vitalis.chat.logic.NickClickTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-26T09:51:02.320Z" hostname="DESKTOP-VA18UL4" time="0.013">
+<testsuite name="com.vitalis.chat.logic.NickClickTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-26T09:59:11.146Z" hostname="DESKTOP-VA18UL4" time="0.014">
   <properties/>
-  <testcase name="quotesStripped()" classname="com.vitalis.chat.logic.NickClickTest" time="0.004"/>
-  <testcase name="parsesAndShowsNick()" classname="com.vitalis.chat.logic.NickClickTest" time="0.003"/>
+  <testcase name="quotesStripped()" classname="com.vitalis.chat.logic.NickClickTest" time="0.006"/>
+  <testcase name="parsesAndShowsNick()" classname="com.vitalis.chat.logic.NickClickTest" time="0.004"/>
   <testcase name="hasClickSuggestAndHover()" classname="com.vitalis.chat.logic.NickClickTest" time="0.001"/>
   <testcase name="shortEnoughForLp()" classname="com.vitalis.chat.logic.NickClickTest" time="0.001"/>
   <testcase name="hoverReadableWithSpaces()" classname="com.vitalis.chat.logic.NickClickTest" time="0.001"/>

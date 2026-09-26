@@ -3,13 +3,20 @@ package com.vitalis.chat;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * LuckPerms writer via ITS OWN classloader (proven EconomyBridge pattern).
  * Console commands split values on whitespace, so anything with spaces
  * (click commands, readable hover text) must go through the API instead.
- * All reflection, all guarded: any mismatch -> ready()==false, silent off.
+ *
+ * Two hard lessons baked in:
+ *  - LP impl classes are package-private: EVERY reflected method needs
+ *    setAccessible(true) or foreign classloaders get IllegalAccessException.
+ *  - every call is guarded: any mismatch -> feature quietly stays off.
  */
 public class LpApi {
     private final Plugin plugin;
@@ -19,8 +26,8 @@ public class LpApi {
     private Method mSaveUser;
     private Method mMetaBuilder;
     private Method mData;
-    private Method mAdd;
     private boolean ready;
+    private boolean tried;
 
     public LpApi(Plugin plugin) {
         this.plugin = plugin;
@@ -28,40 +35,30 @@ public class LpApi {
 
     /** Resolve everything once. Safe to call repeatedly (cached). */
     public synchronized boolean init() {
-        if (ready) return true;
+        if (ready || tried) return ready;
+        tried = true;
         try {
             Plugin lpPlugin = plugin.getServer().getPluginManager().getPlugin("LuckPerms");
             if (lpPlugin == null || !lpPlugin.isEnabled()) return false;
             lpl = lpPlugin.getClass().getClassLoader();
             Class<?> provider = Class.forName("net.luckperms.api.LuckPermsProvider", true, lpl);
-            Object lp = provider.getMethod("get").invoke(null);
-            userManager = lp.getClass().getMethod("getUserManager").invoke(lp);
-            mGetUser = userManager.getClass().getMethod("getUser", UUID.class);
+            Object lp = acc(provider.getMethod("get")).invoke(null);
+            userManager = acc(lp.getClass().getMethod("getUserManager")).invoke(lp);
+            mGetUser = acc(userManager.getClass().getMethod("getUser", UUID.class));
             Class<?> userClass = Class.forName("net.luckperms.api.model.user.User", true, lpl);
-            mSaveUser = findMethod(userManager.getClass(), "saveUser", userClass);
+            mSaveUser = acc(find(userManager.getClass(), "saveUser", userClass));
             Class<?> metaNode = Class.forName("net.luckperms.api.node.types.MetaNode", true, lpl);
-            mMetaBuilder = metaNode.getMethod("builder", String.class, String.class);
-            mData = userClass.getMethod("data");
-            Class<?> nodeClass = Class.forName("net.luckperms.api.node.Node", true, lpl);
-            mAdd = null;
-            ready = true;
-            // data().add(Node): resolve lazily per user (impl class varies)
-            addHelper = nodeClass;
+            mMetaBuilder = acc(metaNode.getMethod("builder", String.class, String.class));
+            mData = acc(userClass.getMethod("data"));
+            ready = mGetUser != null && mMetaBuilder != null && mData != null;
+            if (ready) {
+                plugin.getLogger().info("LuckPerms API hooked (nick meta via API).");
+            }
         } catch (Throwable t) {
             ready = false;
             plugin.getLogger().warning("LuckPerms API unavailable, nick meta off: " + t.getMessage());
         }
         return ready;
-    }
-
-    private Class<?> addHelper;
-
-    private Method findMethod(Class<?> c, String name, Class<?> param) {
-        try {
-            return c.getMethod(name, param);
-        } catch (Throwable ignored) {
-            return null;
-        }
     }
 
     /**
@@ -76,7 +73,8 @@ public class LpApi {
             Object data = mData.invoke(user);
             removeKey(data, key);
             Object builder = mMetaBuilder.invoke(null, key, value);
-            Object node = builder.getClass().getMethod("build").invoke(builder);
+            Method build = acc(builder.getClass().getMethod("build"));
+            Object node = build.invoke(builder);
             Method add = findAdd(data);
             if (add == null) return false;
             add.invoke(data, node);
@@ -92,44 +90,33 @@ public class LpApi {
         }
     }
 
-    /** Remove all nodes of one meta key (MetaNode.getKey() is "meta.<key>"). */
+    /** Remove all nodes of one meta key (exact getMetaKey match, getKey fallback). */
     private void removeKey(Object data, String key) {
         try {
-            Method toCollection = null;
-            for (Method m : data.getClass().getMethods()) {
-                if (m.getName().equals("toCollection") && m.getParameterCount() == 0) {
-                    toCollection = m;
-                    break;
-                }
-            }
+            Method toCollection = acc(find(data.getClass(), "toCollection"));
             if (toCollection == null) return;
             Object col = toCollection.invoke(data);
-            if (!(col instanceof java.util.Collection)) return;
-            java.util.List<Object> victims = new java.util.ArrayList<>();
-            for (Object node : (java.util.Collection<?>) col) {
+            if (!(col instanceof Collection)) return;
+            List<Object> victims = new ArrayList<>();
+            for (Object node : (Collection<?>) col) {
                 try {
-                    // MetaNode.getMetaKey() is exact; getKey() fallback ("meta.<key>")
                     Object mk = null;
                     try {
-                        mk = node.getClass().getMethod("getMetaKey").invoke(node);
+                        Method gmk = acc(find(node.getClass(), "getMetaKey"));
+                        if (gmk != null) mk = gmk.invoke(node);
                     } catch (Throwable ignored) {}
                     if (key.equals(mk)) {
                         victims.add(node);
                         continue;
                     }
-                    Object k = node.getClass().getMethod("getKey").invoke(node);
+                    Method gk = acc(find(node.getClass(), "getKey"));
+                    if (gk == null) continue;
+                    Object k = gk.invoke(node);
                     if (k != null && (k.equals("meta." + key) || k.equals(key))) victims.add(node);
                 } catch (Throwable ignored) {}
             }
             if (victims.isEmpty()) return;
-            Method remover = null;
-            for (Method m : data.getClass().getMethods()) {
-                if ((m.getName().equals("remove") || m.getName().equals("removeExact"))
-                        && m.getParameterCount() == 1) {
-                    remover = m;
-                    break;
-                }
-            }
+            Method remover = pickSingleParam(data.getClass(), "remove", "removeExact");
             if (remover == null) return;
             for (Object v : victims) {
                 try {
@@ -140,15 +127,47 @@ public class LpApi {
     }
 
     private Method findAdd(Object data) {
-        for (Method m : data.getClass().getMethods()) {
-            if (!m.getName().equals("add") || m.getParameterCount() != 1) continue;
-            if (addHelper != null && m.getParameterTypes()[0].isAssignableFrom(addHelper)) return m;
-            // accept (Node) or supertypes implemented by MetaNode
-            try {
-                if (m.getParameterTypes()[0].isAssignableFrom(
-                        Class.forName("net.luckperms.api.node.types.MetaNode", true, lpl))) return m;
-            } catch (Throwable ignored) {}
+        try {
+            Class<?> metaNode = Class.forName("net.luckperms.api.node.types.MetaNode", true, lpl);
+            for (Method m : data.getClass().getMethods()) {
+                if (!m.getName().equals("add") || m.getParameterCount() != 1) continue;
+                try {
+                    if (m.getParameterTypes()[0].isAssignableFrom(metaNode)) return acc(m);
+                } catch (Throwable ignored) {}
+            }
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
+    private static Method find(Class<?> c, String name, Class<?>... params) {
+        try {
+            if (params.length == 0) {
+                for (Method m : c.getMethods()) {
+                    if (m.getName().equals(name) && m.getParameterCount() == 0) return m;
+                }
+                return null;
+            }
+            return c.getMethod(name, params);
+        } catch (Throwable ignored) {
+            return null;
+        }
+    }
+
+    private static Method pickSingleParam(Class<?> c, String... names) {
+        for (String n : names) {
+            for (Method m : c.getMethods()) {
+                if (m.getName().equals(n) && m.getParameterCount() == 1) return acc(m);
+            }
         }
         return null;
+    }
+
+    private static Method acc(Method m) {
+        if (m != null) {
+            try {
+                m.setAccessible(true);
+            } catch (Throwable ignored) {}
+        }
+        return m;
     }
 }

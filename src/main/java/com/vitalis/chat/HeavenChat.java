@@ -170,10 +170,9 @@ public class HeavenChat extends JavaPlugin implements Listener {
     private LpApi lpApi;
 
     /**
-     * Push clickable nick via LP API (spaces allowed — no console involved).
-     * Console `meta unset` first (valid spaceless command): guarantees no
-     * same-key duplicates even if API-side removal ever misses.
-     * Missing meta = invisible nick, so this runs on join + every refresh.
+     * Push clickable nick via LP API (spaces allowed — no console involved,
+     * so no console spam either). Missing meta = invisible nick, so this
+     * runs on join + every refresh.
      */
     public void syncHov(Player p) {
         try {
@@ -182,10 +181,6 @@ public class HeavenChat extends JavaPlugin implements Listener {
             TitlesIndex.Title t = titles.titleOf(p.getUniqueId());
             if (t != null) titleName = t.name;
             String v = NickClick.build(p.getName(), titles.minutes(p.getUniqueId()), titleName);
-            try {
-                getServer().dispatchCommand(getServer().getConsoleSender(),
-                        "lp user " + p.getName() + " meta unset nick");
-            } catch (Exception ignored) {}
             if (!lpApi.setMeta(p.getUniqueId(), "nick", v)) {
                 getLogger().warning("nick meta not applied for " + p.getName());
             }
