@@ -8,36 +8,36 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Clickable nick: parses, has click+hover, spaces allowed (API channel), fits LP storage. */
+/** Gradient nick: parses, shows nick, fits LP storage. Colors only (events stripped by chat). */
 class NickClickTest {
 
     @Test
     void parsesAndShowsNick() {
-        String v = NickClick.build("Kaito21243", 90, "Охотник");
+        String v = NickClick.build("Kaito21243", "#FF0000", "#00FF00");
         Component c = assertDoesNotThrow(() -> MiniMessage.miniMessage().deserialize(v));
         assertEquals("Kaito21243", PlainTextComponentSerializer.plainText().serialize(c));
     }
 
     @Test
-    void hasClickSuggestAndHover() {
-        String v = NickClick.build("Arctusss", 45, "");
-        assertTrue(v.contains("<click:suggest_command:'/w Arctusss '>"), v);
-        assertTrue(v.contains("В игре: 45 мин"), v);
-    }
-
-    @Test
-    void hoverReadableWithSpaces() {
-        String v = NickClick.build("Kai", 90, "Охотник");
-        assertTrue(v.contains("В игре: 1.5 ч · Охотник"), v);
+    void plainWithoutTitle() {
+        assertEquals("Bob", NickClick.build("Bob", null, null));
     }
 
     @Test
     void shortEnoughForLp() {
-        assertTrue(NickClick.build("VeryLongNickName123", 100000, "Путешественник Нижнего Мира").length() < 200);
+        assertTrue(NickClick.build("VeryLongNickName123", "#BDBDBD", "#FFFFFF").length() < 200);
     }
 
     @Test
     void quotesStripped() {
-        assertFalse(NickClick.build("a\"b", 10, null).contains("\""));
+        assertFalse(NickClick.build("a\"b", "#FFF", "#000").contains("\""));
+    }
+
+    @Test
+    void noEventTags() {
+        // chat strips events: value must carry zero click/hover tags
+        String v = NickClick.build("Kai", "#111111", "#222222");
+        assertFalse(v.contains("click"));
+        assertFalse(v.contains("hover"));
     }
 }

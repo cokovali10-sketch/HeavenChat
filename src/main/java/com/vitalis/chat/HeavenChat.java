@@ -170,17 +170,16 @@ public class HeavenChat extends JavaPlugin implements Listener {
     private LpApi lpApi;
 
     /**
-     * Push clickable nick via LP API (spaces allowed — no console involved,
-     * so no console spam either). Missing meta = invisible nick, so this
-     * runs on join + every refresh.
+     * Push title-gradient nick via LP API. Missing meta = invisible nick,
+     * so this runs on join + every refresh.
      */
     public void syncHov(Player p) {
         try {
             if (lpApi == null) lpApi = new LpApi(this);
-            String titleName = "";
             TitlesIndex.Title t = titles.titleOf(p.getUniqueId());
-            if (t != null) titleName = t.name;
-            String v = NickClick.build(p.getName(), titles.minutes(p.getUniqueId()), titleName);
+            String v = t == null
+                    ? p.getName().replace("\"", "")
+                    : NickClick.build(p.getName(), t.from, t.to);
             if (!lpApi.setMeta(p.getUniqueId(), "nick", v)) {
                 getLogger().warning("nick meta not applied for " + p.getName());
             }

@@ -1,21 +1,19 @@
 package com.vitalis.chat;
 
 /**
- * Public-chat nick via LuckPerms META, set through the LP API
- * (console splits whitespace — API has no such limit).
- * <click:suggest_command:'/w Nick '><hover:show_text:'В игре: 90 ч · Охотник'>Nick</hover></click>
- * Pure logic, unit-tested. Kept under LP H2 VARCHAR(200).
+ * Public-chat nick via LuckPerms META, set through the LP API.
+ * Proven by live matrix test: OriginChat parses COLOR tags in values,
+ * but strips event tags (click/hover). So the nick carries the ACTIVE
+ * TITLE GRADIENT — nothing else. Click/hover live in /w PMs instead.
+ * <gradient:#FROM:#TO>Nick</gradient> (or plain Nick without a title).
+ * Pure logic, unit-tested. Short, no whitespace issues either way.
  */
 public final class NickClick {
     private NickClick() {}
 
-    public static String build(String nick, long playMinutes, String titleName) {
+    public static String build(String nick, String fromHex, String toHex) {
         String safeNick = nick.replace("\"", "");
-        String hours = PlaytimeIndex.hours(playMinutes);
-        String hov = "В игре: " + hours;
-        if (titleName != null && !titleName.isEmpty()) hov += " · " + titleName;
-        return "<click:suggest_command:'/w " + safeNick + " '>"
-                + "<hover:show_text:'" + hov + "'>"
-                + safeNick + "</hover></click>";
+        if (fromHex == null || toHex == null) return safeNick;
+        return "<gradient:" + fromHex + ":" + toHex + ">" + safeNick + "</gradient>";
     }
 }

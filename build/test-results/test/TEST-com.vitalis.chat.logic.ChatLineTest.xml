@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.vitalis.chat.logic.ChatLineTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-09-26T09:59:11.015Z" hostname="DESKTOP-VA18UL4" time="0.106">
+<testsuite name="com.vitalis.chat.logic.ChatLineTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-09-26T10:16:29.569Z" hostname="DESKTOP-VA18UL4" time="0.135">
   <properties/>
-  <testcase name="tintOffWhiteClean()" classname="com.vitalis.chat.logic.ChatLineTest" time="0.041"/>
-  <testcase name="groupPrefixLegacyClean()" classname="com.vitalis.chat.logic.ChatLineTest" time="0.002"/>
-  <testcase name="fullLineClean()" classname="com.vitalis.chat.logic.ChatLineTest" time="0.002"/>
+  <testcase name="tintOffWhiteClean()" classname="com.vitalis.chat.logic.ChatLineTest" time="0.057"/>
+  <testcase name="groupPrefixLegacyClean()" classname="com.vitalis.chat.logic.ChatLineTest" time="0.004"/>
+  <testcase name="fullLineClean()" classname="com.vitalis.chat.logic.ChatLineTest" time="0.004"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
