@@ -1,0 +1,5 @@
+# HeavenChat v1.0.0 - Purpur/Paper 1.21.11
+general:
+  prefix: '<gradient:#7AD9FF:#FFD76A>[Чат]</gradient> <gray>'
+  # minutes between playtime hover refreshes
+  refresh-minutes: 10

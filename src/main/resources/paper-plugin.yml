@@ -1,0 +1,12 @@
+name: HeavenChat
+version: ${version}
+main: com.vitalis.chat.HeavenChat
+api-version: "1.21"
+author: Vitalis
+description: "Clickable nicks in chat (whisper on click, playtime on hover). Purpur/Paper 1.21.11."
+depend: []
+softdepend: [LuckPerms, HeavenTitles]
+permissions:
+  heavenchat.use:
+    description: "Clickable nick (automatic for everyone)."
+    default: true
