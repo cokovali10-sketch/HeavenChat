@@ -74,34 +74,16 @@ public class HeavenChat extends JavaPlugin implements Listener {
         }
         getServer().getPluginManager().registerEvents(this, this);
 
-        // refresh titles/playtime cache + push nick hovers (async file reads,
-        // then sync LP push on main thread)
-        getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
-            titles.reload();
-            getServer().getScheduler().runTask(this, () -> {
-                for (Player p : getServer().getOnlinePlayers()) {
-                    try {
-                        syncHov(p);
-                    } catch (Exception ignored) {}
-                }
-            });
-        }, 400L, (long) refreshMinutes * 20L * 60L);
+        // refresh titles/playtime cache (file reads only, feeds PM hover)
+        getServer().getScheduler().runTaskTimerAsynchronously(this, titles::reload,
+                400L, (long) refreshMinutes * 20L * 60L);
 
         getLogger().info("HeavenChat enabled: /w /r whispers, mentions.");
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent e) {
-        Player p = e.getPlayer();
-        nicks.add(p.getName());
-        getServer().getScheduler().runTaskLater(this, () -> {
-            try {
-                if (p.isOnline()) {
-                    titles.reload();
-                    syncHov(p);
-                }
-            } catch (Exception ignored) {}
-        }, 60L);
+        nicks.add(e.getPlayer().getName());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -165,27 +147,6 @@ public class HeavenChat extends JavaPlugin implements Listener {
 
     static String escapeTags(String s) {
         return s.replace("<", "&lt;").replace(">", "&gt;");
-    }
-
-    private LpApi lpApi;
-
-    /**
-     * Push title-gradient nick via LP API. Missing meta = invisible nick,
-     * so this runs on join + every refresh.
-     */
-    public void syncHov(Player p) {
-        try {
-            if (lpApi == null) lpApi = new LpApi(this);
-            TitlesIndex.Title t = titles.titleOf(p.getUniqueId());
-            String v = t == null
-                    ? p.getName().replace("\"", "")
-                    : NickClick.build(p.getName(), t.from, t.to);
-            if (!lpApi.setMeta(p.getUniqueId(), "nick", v)) {
-                getLogger().warning("nick meta not applied for " + p.getName());
-            }
-        } catch (Exception ex) {
-            getLogger().warning("nick sync failed: " + ex.getMessage());
-        }
     }
 
     public TitlesIndex titles() { return titles; }
