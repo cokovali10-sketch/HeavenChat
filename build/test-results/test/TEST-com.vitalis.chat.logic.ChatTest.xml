@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.vitalis.chat.logic.ChatTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-26T08:46:11.422Z" hostname="DESKTOP-VA18UL4" time="0.218">
+<testsuite name="com.vitalis.chat.logic.ChatTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-26T09:03:36.939Z" hostname="DESKTOP-VA18UL4" time="0.255">
   <properties/>
-  <testcase name="valueHasClickAndHover()" classname="com.vitalis.chat.logic.ChatTest" time="0.024"/>
-  <testcase name="valueParsesAndShowsNick()" classname="com.vitalis.chat.logic.ChatTest" time="0.091"/>
-  <testcase name="parsesRealPlayersShape()" classname="com.vitalis.chat.logic.ChatTest" time="0.075"/>
-  <testcase name="hoursText()" classname="com.vitalis.chat.logic.ChatTest" time="0.004"/>
+  <testcase name="valueHasClickAndHover()" classname="com.vitalis.chat.logic.ChatTest" time="0.037"/>
+  <testcase name="valueParsesAndShowsNick()" classname="com.vitalis.chat.logic.ChatTest" time="0.108"/>
+  <testcase name="parsesRealPlayersShape()" classname="com.vitalis.chat.logic.ChatTest" time="0.074"/>
+  <testcase name="hoursText()" classname="com.vitalis.chat.logic.ChatTest" time="0.005"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

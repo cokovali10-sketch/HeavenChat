@@ -1,5 +1,22 @@
-# HeavenChat v1.0.0 - Purpur/Paper 1.21.11
+# HeavenChat v1.1.0 - Purpur/Paper 1.21.11
 general:
   prefix: '<gradient:#7AD9FF:#FFD76A>[Чат]</gradient> <gray>'
   # minutes between playtime hover refreshes
   refresh-minutes: 10
+mentions:
+  enabled: true
+  # underline the @nick (title tint colors stay untouched).
+  # kill-switch: if some chat ever prints tags literally, set false (sound keeps working)
+  highlight: true
+  sound: BLOCK_NOTE_BLOCK_PLING
+  volume: 0.7
+  pitch: 1.4
+  # min seconds between mention pings to the same player
+  cooldown-seconds: 5
+pm:
+  enabled: true
+  sound: ENTITY_EXPERIENCE_ORB_PICKUP
+  volume: 0.6
+  pitch: 1.0
+  # seconds to wait before pinging again for the same conversation
+  cooldown-seconds: 3
