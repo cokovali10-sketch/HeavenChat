@@ -108,6 +108,15 @@ public class LpApi {
             java.util.List<Object> victims = new java.util.ArrayList<>();
             for (Object node : (java.util.Collection<?>) col) {
                 try {
+                    // MetaNode.getMetaKey() is exact; getKey() fallback ("meta.<key>")
+                    Object mk = null;
+                    try {
+                        mk = node.getClass().getMethod("getMetaKey").invoke(node);
+                    } catch (Throwable ignored) {}
+                    if (key.equals(mk)) {
+                        victims.add(node);
+                        continue;
+                    }
                     Object k = node.getClass().getMethod("getKey").invoke(node);
                     if (k != null && (k.equals("meta." + key) || k.equals(key))) victims.add(node);
                 } catch (Throwable ignored) {}

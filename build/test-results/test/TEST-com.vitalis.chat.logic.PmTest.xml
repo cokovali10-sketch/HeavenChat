@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.vitalis.chat.logic.PmTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-26T09:47:54.932Z" hostname="DESKTOP-VA18UL4" time="0.079">
+<testsuite name="com.vitalis.chat.logic.PmTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-26T09:51:02.334Z" hostname="DESKTOP-VA18UL4" time="0.069">
   <properties/>
-  <testcase name="parsesRealPlayersShape()" classname="com.vitalis.chat.logic.PmTest" time="0.062"/>
-  <testcase name="incomingRenders()" classname="com.vitalis.chat.logic.PmTest" time="0.009"/>
-  <testcase name="hoursText()" classname="com.vitalis.chat.logic.PmTest" time="0.001"/>
-  <testcase name="outgoingRenders()" classname="com.vitalis.chat.logic.PmTest" time="0.0"/>
-  <testcase name="hoverText()" classname="com.vitalis.chat.logic.PmTest" time="0.0"/>
+  <testcase name="parsesRealPlayersShape()" classname="com.vitalis.chat.logic.PmTest" time="0.048"/>
+  <testcase name="incomingRenders()" classname="com.vitalis.chat.logic.PmTest" time="0.012"/>
+  <testcase name="hoursText()" classname="com.vitalis.chat.logic.PmTest" time="0.002"/>
+  <testcase name="outgoingRenders()" classname="com.vitalis.chat.logic.PmTest" time="0.002"/>
+  <testcase name="hoverText()" classname="com.vitalis.chat.logic.PmTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
