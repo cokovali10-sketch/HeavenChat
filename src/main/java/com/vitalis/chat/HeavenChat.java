@@ -74,16 +74,34 @@ public class HeavenChat extends JavaPlugin implements Listener {
         }
         getServer().getPluginManager().registerEvents(this, this);
 
-        // refresh titles/playtime cache (file reads only, no commands)
-        getServer().getScheduler().runTaskTimerAsynchronously(this, titles::reload,
-                400L, (long) refreshMinutes * 20L * 60L);
+        // refresh titles/playtime cache + push nick hovers (async file reads,
+        // then sync LP push on main thread)
+        getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+            titles.reload();
+            getServer().getScheduler().runTask(this, () -> {
+                for (Player p : getServer().getOnlinePlayers()) {
+                    try {
+                        syncHov(p);
+                    } catch (Exception ignored) {}
+                }
+            });
+        }, 400L, (long) refreshMinutes * 20L * 60L);
 
         getLogger().info("HeavenChat enabled: /w /r whispers, mentions.");
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent e) {
-        nicks.add(e.getPlayer().getName());
+        Player p = e.getPlayer();
+        nicks.add(p.getName());
+        getServer().getScheduler().runTaskLater(this, () -> {
+            try {
+                if (p.isOnline()) {
+                    titles.reload();
+                    syncHov(p);
+                }
+            } catch (Exception ignored) {}
+        }, 60L);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -147,6 +165,33 @@ public class HeavenChat extends JavaPlugin implements Listener {
 
     static String escapeTags(String s) {
         return s.replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    private LpApi lpApi;
+
+    /**
+     * Push clickable nick via LP API (spaces allowed — no console involved).
+     * Console `meta unset` first (valid spaceless command): guarantees no
+     * same-key duplicates even if API-side removal ever misses.
+     * Missing meta = invisible nick, so this runs on join + every refresh.
+     */
+    public void syncHov(Player p) {
+        try {
+            if (lpApi == null) lpApi = new LpApi(this);
+            String titleName = "";
+            TitlesIndex.Title t = titles.titleOf(p.getUniqueId());
+            if (t != null) titleName = t.name;
+            String v = NickClick.build(p.getName(), titles.minutes(p.getUniqueId()), titleName);
+            try {
+                getServer().dispatchCommand(getServer().getConsoleSender(),
+                        "lp user " + p.getName() + " meta unset nick");
+            } catch (Exception ignored) {}
+            if (!lpApi.setMeta(p.getUniqueId(), "nick", v)) {
+                getLogger().warning("nick meta not applied for " + p.getName());
+            }
+        } catch (Exception ex) {
+            getLogger().warning("nick sync failed: " + ex.getMessage());
+        }
     }
 
     public TitlesIndex titles() { return titles; }
