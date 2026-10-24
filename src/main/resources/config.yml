@@ -19,3 +19,21 @@ pm:
   pitch: 1.0
   # seconds between /w sends per player (anti-spam)
   cooldown-seconds: 2
+
+# Красивое приветствие входа/выхода. Полностью заменяет ванильные
+# сообщения. Поддерживает &-цвета, hex (&a... / <#RRGGBB>) и MiniMessage
+# (<gradient:#...:#...>). Плейсхолдеры: %player% %online% %max%.
+welcome:
+  enabled: true
+  first-join: "<#FFD76A>✦ <gradient:#FFD76A:#7AD9FF><bold>%player%</bold></gradient> <gray>впервые на <gradient:#FFD76A:#7AD9FF>Heaven</gradient><gray>! <#7AD9FF>Добро пожаловать!"
+  join: "<#7AD9FF><bold>»</bold> <white>%player% <gray>присоединился <dark_gray>(<#7AD9FF>%online%<dark_gray>/<gray>%max%<dark_gray>)"
+  quit: "<#FF9E9E><bold>«</bold> <white>%player% <gray>покинул сервер"
+  # Анимированный титул при входе (плавное появление и затухание)
+  title:
+    enabled: true
+    title: "<gradient:#FFD76A:#7AD9FF><bold>✦ ʜᴇᴀᴠᴇɴ ✦</bold></gradient>"
+    subtitle: "<gray>Привет, <#7AD9FF><bold>%player%</bold></gray>"
+    first-subtitle: "<#FFD76A>Добро пожаловать в Heaven!"
+    fade-in: 10
+    stay: 70
+    fade-out: 20

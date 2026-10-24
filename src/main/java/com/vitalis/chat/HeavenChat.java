@@ -1,5 +1,6 @@
 package com.vitalis.chat;
 
+import net.kyori.adventure.title.Title;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -39,6 +40,17 @@ public class HeavenChat extends JavaPlugin implements Listener {
     private float pmPitch = 1.0f;
     private long pmCooldownMs = 2000;
     private String chatPrefix = "<gradient:#7AD9FF:#FFD76A>[Чат]</gradient> <gray>";
+    private boolean welcomeEnabled = true;
+    private String firstJoinMsg;
+    private String joinMsg;
+    private String quitMsg;
+    private boolean titleEnabled = true;
+    private String titleText;
+    private String subtitleText;
+    private String firstSubtitleText;
+    private int titleFadeIn = 10;
+    private int titleStay = 70;
+    private int titleFadeOut = 20;
 
     @Override
     public void onEnable() {
@@ -58,6 +70,23 @@ public class HeavenChat extends JavaPlugin implements Listener {
         pmVol = (float) getConfig().getDouble("pm.volume", 0.6);
         pmPitch = (float) getConfig().getDouble("pm.pitch", 1.0);
         pmCooldownMs = getConfig().getLong("pm.cooldown-seconds", 2) * 1000L;
+        welcomeEnabled = getConfig().getBoolean("welcome.enabled", true);
+        firstJoinMsg = getConfig().getString("welcome.first-join",
+                "&8[&a+&8] &6✦ &f%player% &eвпервые на сервере! Поприветствуем!");
+        joinMsg = getConfig().getString("welcome.join",
+                "&8[&a+&8] &f%player% &7зашёл на сервер &8(&f%online%&7/&f%max%&8)");
+        quitMsg = getConfig().getString("welcome.quit",
+                "&8[&c-&8] &f%player% &7вышел с сервера");
+        titleEnabled = getConfig().getBoolean("welcome.title.enabled", true);
+        titleText = getConfig().getString("welcome.title.title",
+                "<gradient:#FFD76A:#7AD9FF><bold>✦ ʜᴇᴀᴠᴇɴ ✦</bold></gradient>");
+        subtitleText = getConfig().getString("welcome.title.subtitle",
+                "<gray>Привет, <#7AD9FF><bold>%player%</bold></gray>");
+        firstSubtitleText = getConfig().getString("welcome.title.first-subtitle",
+                "<#FFD76A>Добро пожаловать в Heaven!");
+        titleFadeIn = getConfig().getInt("welcome.title.fade-in", 10);
+        titleStay = getConfig().getInt("welcome.title.stay", 70);
+        titleFadeOut = getConfig().getInt("welcome.title.fade-out", 20);
 
         titles.reload();
         getLogger().info("Titles index: " + titles.titleCount() + " titles.");
@@ -84,11 +113,45 @@ public class HeavenChat extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent e) {
         nicks.add(e.getPlayer().getName());
+        if (!welcomeEnabled) {
+            return;
+        }
+        Player p = e.getPlayer();
+        boolean first = !p.hasPlayedBefore();
+        int online = getServer().getOnlinePlayers().size();
+        String template = first ? firstJoinMsg : joinMsg;
+        e.joinMessage(Msg.color(WelcomeText.render(template, p.getName(),
+                online, getServer().getMaxPlayers())));
+        if (titleEnabled) {
+            final Player pl = p;
+            final String ttl = WelcomeText.render(titleText, p.getName(), online, getServer().getMaxPlayers());
+            final String sub = WelcomeText.render(first ? firstSubtitleText : subtitleText,
+                    p.getName(), online, getServer().getMaxPlayers());
+            getServer().getScheduler().runTaskLater(this, () -> {
+                if (!pl.isOnline()) return;
+                try {
+                    Title.Times times = Title.Times.times(
+                            java.time.Duration.ofMillis(Math.max(1, titleFadeIn) * 50L),
+                            java.time.Duration.ofMillis(Math.max(1, titleStay) * 50L),
+                            java.time.Duration.ofMillis(Math.max(1, titleFadeOut) * 50L));
+                    pl.showTitle(Title.title(Msg.color(ttl), Msg.color(sub), times));
+                } catch (Throwable ignored) {
+                }
+            }, 10L);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuit(PlayerQuitEvent e) {
         nicks.remove(e.getPlayer().getName());
+        if (!welcomeEnabled) {
+            return;
+        }
+        Player p = e.getPlayer();
+        // the quitting player is still counted in the list -> -1
+        int online = Math.max(0, getServer().getOnlinePlayers().size() - 1);
+        e.quitMessage(Msg.color(WelcomeText.render(quitMsg, p.getName(),
+                online, getServer().getMaxPlayers())));
     }
 
     /**
