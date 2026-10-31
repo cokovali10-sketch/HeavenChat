@@ -107,3 +107,20 @@ src/main/java/com/vitalis/chat/
 ## Лицензия
 
 MIT — см. [LICENSE](LICENSE).
+
+## Problem
+Minecraft chat plugin (Bukkit/Spigot). Provides chat formatting, channels, and moderation tools.
+
+## Architecture
+Gradle + Java 17. Event-driven chat listeners, channel manager, permission checks.
+
+## Trade-offs
+- Simplicity over feature richness; targeted at single-server/single-tenant use.
+- Java 17 baseline; no support for older runtimes.
+
+## Benchmarks
+- (add measurements here)
+
+## Limitations
+- Minecraft-version specific; requires matching server API.
+- No automated integration tests against a live server.
