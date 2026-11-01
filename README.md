@@ -1,3 +1,9 @@
+<div align="center">
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,50:38bdf8,100:a78bfa&height=160&section=header&text=HeavenChat&fontSize=48&fontColor=ffffff&fontAlignY=38&animation=fadeIn" alt="header" />
+
+</div>
+
 # HeavenPM (HeavenChat)
 
 [![Paper](https://img.shields.io/badge/Paper-1.21.11-2b2b2b?logo=paper&logoColor=white)](https://papermc.io/)
